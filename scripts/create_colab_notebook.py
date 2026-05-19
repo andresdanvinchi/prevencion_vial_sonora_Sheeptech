@@ -108,28 +108,31 @@ sns.set_theme(style="whitegrid", palette="Set2")
     ),
     md(
         r"""
-## 3. Ubicar datos del proyecto
+## 3. Configurar fuente de datos
 
-Por defecto, el notebook lee los CSV directamente desde GitHub usando `raw.githubusercontent.com`.
+Por defecto, el notebook usa `DATA_SOURCE = "auto"`:
 
-Si quieres ejecutarlo con archivos locales, cambia `USE_GITHUB_DATA` a `False` y conserva la estructura `datos/originales/...` dentro del proyecto.
+1. Intenta leer los CSV desde GitHub raw.
+2. Si GitHub no responde, intenta jsDelivr como espejo CDN del repositorio.
+3. Si no hay red disponible, intenta leer archivos locales con la estructura `datos/originales/...`.
+
+Si estas en Colab y aparece `Network is unreachable`, el runtime no tiene salida a internet en ese momento. En ese caso sube la carpeta del proyecto a Colab o monta Google Drive y deja `DATA_SOURCE = "auto"` o cambia a `DATA_SOURCE = "local"`.
 """
     ),
     code(
         r"""
-USE_GITHUB_DATA = True
+DATA_SOURCE = "auto"  # opciones: "auto", "github", "local"
 GITHUB_BRANCH = "feature/notebook-atus-sonora-10-anios"
 GITHUB_RAW_BASE = (
     "https://raw.githubusercontent.com/"
     f"andresdanvinchi/prevencion_vial_sonora_Sheeptech/{GITHUB_BRANCH}"
 )
+JSDELIVR_BASE = (
+    "https://cdn.jsdelivr.net/gh/"
+    f"andresdanvinchi/prevencion_vial_sonora_Sheeptech@{GITHUB_BRANCH}"
+)
 
-if USE_GITHUB_DATA:
-    DATA_DIR = f"{GITHUB_RAW_BASE}/datos/originales/conjunto_de_datos"
-    CAT_DIR = f"{GITHUB_RAW_BASE}/datos/originales/catalogos"
-    print("Fuente de datos: GitHub raw")
-    print("Datos:", DATA_DIR)
-else:
+def find_local_project_dir():
     # Si usas Google Drive, descomenta estas lineas:
     # from google.colab import drive
     # drive.mount("/content/drive")
@@ -140,24 +143,44 @@ else:
         Path("/content/prevencion_vial_sonora_Sheeptech"),
         Path("/content/drive/MyDrive/prevencion_vial_sonora_Sheeptech"),
     ]
-
-    PROJECT_DIR = None
     for base in candidate_base_dirs:
         if (base / "datos" / "originales" / "conjunto_de_datos").exists():
-            PROJECT_DIR = base
-            break
+            return base
+    return None
 
-    if PROJECT_DIR is None:
-        raise FileNotFoundError(
-            "No se encontro la carpeta datos/originales/conjunto_de_datos. "
-            "Sube el proyecto completo a Colab o ajusta PROJECT_DIR manualmente."
-        )
+DATA_SOURCES = []
+if DATA_SOURCE in ("auto", "github"):
+    DATA_SOURCES.extend([
+        {
+            "name": "GitHub raw",
+            "data_dir": f"{GITHUB_RAW_BASE}/datos/originales/conjunto_de_datos",
+            "cat_dir": f"{GITHUB_RAW_BASE}/datos/originales/catalogos",
+        },
+        {
+            "name": "jsDelivr CDN",
+            "data_dir": f"{JSDELIVR_BASE}/datos/originales/conjunto_de_datos",
+            "cat_dir": f"{JSDELIVR_BASE}/datos/originales/catalogos",
+        },
+    ])
 
-    DATA_DIR = PROJECT_DIR / "datos" / "originales" / "conjunto_de_datos"
-    CAT_DIR = PROJECT_DIR / "datos" / "originales" / "catalogos"
-    print("Fuente de datos: local")
-    print("Proyecto:", PROJECT_DIR)
-    print("Datos:", DATA_DIR)
+if DATA_SOURCE in ("auto", "local"):
+    PROJECT_DIR = find_local_project_dir()
+    if PROJECT_DIR is not None:
+        DATA_SOURCES.append({
+            "name": "local",
+            "data_dir": PROJECT_DIR / "datos" / "originales" / "conjunto_de_datos",
+            "cat_dir": PROJECT_DIR / "datos" / "originales" / "catalogos",
+        })
+
+if not DATA_SOURCES:
+    raise FileNotFoundError(
+        "No hay fuentes de datos disponibles. Si no tienes red, sube la carpeta del proyecto "
+        "a Colab o monta Google Drive con datos/originales/conjunto_de_datos."
+    )
+
+print("Fuentes configuradas:")
+for source in DATA_SOURCES:
+    print("-", source["name"], ":", source["data_dir"])
 """
     ),
     md("## 4. Cargar ATUS 2015-2024 y filtrar Sonora"),
@@ -165,6 +188,7 @@ else:
         r"""
 YEARS = list(range(2015, 2025))
 SONORA_ID = "26"
+ACTIVE_SOURCE = None
 
 def data_path(base_dir, filename):
     if isinstance(base_dir, str):
@@ -186,11 +210,36 @@ def read_csv_clean(path_or_url):
         df[col] = df[col].replace({"nan": np.nan, "None": np.nan})
     return df
 
+def read_csv_from_sources(filename, folder):
+    global ACTIVE_SOURCE
+
+    sources_to_try = []
+    if ACTIVE_SOURCE is not None:
+        sources_to_try.append(ACTIVE_SOURCE)
+    sources_to_try.extend([source for source in DATA_SOURCES if source is not ACTIVE_SOURCE])
+
+    errors = []
+    for source in sources_to_try:
+        base_dir = source["data_dir"] if folder == "data" else source["cat_dir"]
+        path = data_path(base_dir, filename)
+        if isinstance(path, Path) and not path.exists():
+            errors.append(f'{source["name"]}: no existe {path}')
+            continue
+        try:
+            df = read_csv_clean(path)
+            ACTIVE_SOURCE = source
+            return df
+        except Exception as exc:
+            errors.append(f'{source["name"]}: {type(exc).__name__}: {exc}')
+
+    raise RuntimeError(
+        "No se pudieron leer los datos. Si ves 'Network is unreachable', el entorno no tiene internet. "
+        "Sube la carpeta del proyecto a Colab o monta Google Drive y usa DATA_SOURCE = 'local'.\n\n"
+        + "\n".join(errors[-6:])
+    )
+
 def read_atus_year(year):
-    path = data_path(DATA_DIR, f"atus_anual_{year}.csv")
-    if isinstance(path, Path) and not path.exists():
-        raise FileNotFoundError(f"No existe {path}")
-    return read_csv_clean(path)
+    return read_csv_from_sources(f"atus_anual_{year}.csv", folder="data")
 
 frames = []
 for year in YEARS:
@@ -200,7 +249,7 @@ for year in YEARS:
 
 atus = pd.concat(frames, ignore_index=True)
 
-mun = read_csv_clean(data_path(CAT_DIR, "tc_municipio.csv"))
+mun = read_csv_from_sources("tc_municipio.csv", folder="cat")
 mun["ID_ENTIDAD"] = mun["ID_ENTIDAD"].str.zfill(2)
 mun["ID_MUNICIPIO"] = mun["ID_MUNICIPIO"].str.zfill(3)
 
