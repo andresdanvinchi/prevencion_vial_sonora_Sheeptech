@@ -1,0 +1,187 @@
+# E2 - Analisis exploratorio y preprocesamiento
+
+## 1. Descripcion del dataset
+
+Para esta etapa se trabajo con la base de datos **Accidentes de Transito Terrestre en Zonas Urbanas y Suburbanas (ATUS)**, publicada por el Instituto Nacional de Estadistica y Geografia (INEGI). La informacion utilizada corresponde al estado de **Sonora** y cubre un periodo de **10 anos, de 2015 a 2024**.
+
+El notebook principal de esta etapa se encuentra en:
+
+`notebooks/atus_sonora_10_anios_prevencion.ipynb`
+
+La base original contiene registros anuales de accidentes de transito en Mexico. Para este proyecto se filtraron solamente los registros de Sonora, usando la clave de entidad `26`. Antes de la depuracion habia **187,104 registros** de Sonora. Despues de quitar los registros marcados como `Certificado cero`, quedaron **183,911 accidentes reales** para el analisis.
+
+Las dimensiones finales del dataset preparado fueron:
+
+| Elemento | Valor |
+|---|---:|
+| Periodo cubierto | 2015-2024 |
+| Registros de Sonora antes de depurar | 187,104 |
+| Registros `Certificado cero` eliminados | 3,193 |
+| Accidentes analizados | 183,911 |
+| Columnas despues de variables derivadas | 55 |
+| Municipios presentes | 70 |
+
+El dataset incluye variables de diferentes tipos:
+
+| Tipo de variable | Ejemplos |
+|---|---|
+| Identificacion geografica | `ID_ENTIDAD`, `ID_MUNICIPIO`, `NOM_MUNICIPIO`, `REGION` |
+| Temporales | `ANIO`, `MES`, `ID_DIA`, `DIASEMANA`, `ID_HORA`, `FECHA_MES`, `RANGO_HORA` |
+| Categoricas | `TIPACCID`, `CAUSAACCI`, `CAPAROD`, `SEXO`, `ALIENTO`, `CINTURON` |
+| Numericas discretas | vehiculos involucrados, heridos, fallecidos |
+| Variables derivadas | `TOTAL_HERIDOS`, `TOTAL_MUERTOS`, `TOTAL_VICTIMAS`, `TOTAL_VEHICULOS`, `GRAVE_BIN` |
+
+## 2. Analisis estadistico descriptivo
+
+Primero revise las variables numericas principales para entender la magnitud de los accidentes. La mayoria de los accidentes no tienen personas heridas ni fallecidas, por eso las medianas de heridos, muertos y victimas son cero. Aun asi, existen casos con valores altos que representan accidentes de mayor gravedad.
+
+| Variable | Media | Mediana | Desviacion estandar | Minimo | Maximo |
+|---|---:|---:|---:|---:|---:|
+| `TOTAL_HERIDOS` | 0.22 | 0.00 | 0.62 | 0 | 27 |
+| `TOTAL_MUERTOS` | 0.01 | 0.00 | 0.13 | 0 | 6 |
+| `TOTAL_VICTIMAS` | 0.23 | 0.00 | 0.64 | 0 | 32 |
+| `TOTAL_VEHICULOS` | 1.89 | 2.00 | 0.48 | 1 | 9 |
+| `HORA_VALIDA` | 13.39 | 14.00 | 5.77 | 0 | 23 |
+| `EDAD_CONDUCTOR` | 37.79 | 35.00 | 14.67 | 12 | 98 |
+
+Tambien identifique que el **16.99%** de los accidentes fueron clasificados como graves, considerando la presencia de personas heridas o fallecidas.
+
+La distribucion anual muestra un crecimiento importante despues de 2020. Los accidentes por ano fueron:
+
+| Ano | Accidentes |
+|---:|---:|
+| 2015 | 11,960 |
+| 2016 | 13,145 |
+| 2017 | 15,927 |
+| 2018 | 15,938 |
+| 2019 | 16,624 |
+| 2020 | 12,893 |
+| 2021 | 20,743 |
+| 2022 | 25,325 |
+| 2023 | 26,557 |
+| 2024 | 24,799 |
+
+## 3. Visualizaciones exploratorias e interpretacion
+
+### Grafica 1. Accidentes por ano
+
+Esta grafica permite ver la evolucion de los accidentes durante el periodo 2015-2024. Observe que los accidentes aumentan gradualmente hasta 2019, bajan en 2020 y despues suben con fuerza en 2021, 2022 y 2023. El ano con mas accidentes fue **2023**, con **26,557 registros**.
+
+Esta tendencia me indica que el periodo posterior a 2020 debe analizarse con atencion, porque concentra los niveles mas altos del periodo. Tambien muestra que no conviene estudiar un solo ano, ya que el comportamiento cambia bastante en el tiempo.
+
+### Grafica 2. Accidentes por region
+
+La grafica por region muestra que **Hermosillo** concentra la mayor cantidad de accidentes, con **65,252 registros**. Despues aparecen **Sur y Valle** con **54,154** y **Frontera** con **44,264**.
+
+Esto confirma que las regiones con mayor movilidad urbana, actividad economica o flujo vehicular tienen mas accidentes. Sin embargo, esto no significa automaticamente que sean las regiones mas graves, por eso tambien fue necesario analizar el porcentaje de accidentes con victimas.
+
+### Grafica 3. Tipos de accidente mas frecuentes
+
+El tipo de accidente mas frecuente fue **colision con vehiculo automotor**, con **125,202 casos**. En segundo lugar aparece la **colision con motocicleta**, con **18,531 casos**, y despues la **colision con objeto fijo**, con **17,205 casos**.
+
+Esta grafica me ayudo a identificar que la mayor parte del problema esta relacionada con choques entre vehiculos. Para la prevencion, esto apunta a medidas como control de velocidad, distancia segura, vigilancia en cruces y respeto a senalamientos.
+
+### Grafica 4. Causas probables de los accidentes
+
+La causa probable mas registrada fue **Conductor**, con **178,145 accidentes**. Las demas causas tienen mucha menor frecuencia: `Peaton o pasajero`, `Falla del vehiculo`, `Mala condicion del camino` y `Otra`.
+
+Esto me indica que las estrategias de prevencion deben enfocarse principalmente en conducta vial. No se trata de senalar culpables individuales, sino de reconocer que el comportamiento del conductor aparece como el factor mas repetido en la base.
+
+### Grafica 5. Mapa de calor de causas por region
+
+El mapa de calor muestra que la causa `Conductor` domina en todas las regiones. En Hermosillo representa aproximadamente **99.03%** de los casos y en Sur y Valle **96.48%**. En la Sierra baja a **75.23%**, pero sigue siendo la causa principal.
+
+Esta visualizacion es importante porque permite comparar regiones. Aunque la causa principal es similar, la proporcion cambia entre zonas, lo que sugiere que algunas regiones tambien pueden requerir atencion a condiciones del camino, tipo de movilidad o contexto geografico.
+
+### Grafica 6. Mapa de calor por rango de hora y dia de semana
+
+El cruce con mayor concentracion de accidentes fue **viernes por la tarde**, con **10,802 accidentes**. Este resultado puede estar relacionado con salida laboral, traslados de fin de semana, mayor flujo comercial y movilidad urbana.
+
+Esta grafica sirve para proponer prevencion por horario. Por ejemplo, podria reforzarse la vigilancia en tardes y en dias cercanos al fin de semana, especialmente en zonas de alta movilidad.
+
+### Grafica 7. Gravedad por region
+
+Aunque Hermosillo tiene mas accidentes, la proporcion de accidentes graves no es la mas alta. Las regiones con mayor porcentaje de gravedad fueron:
+
+| Region | Porcentaje de accidentes graves |
+|---|---:|
+| Sierra | 24.25% |
+| Centro | 22.38% |
+| Sur y Valle | 21.12% |
+| Otros municipios | 19.00% |
+| Costa y desierto | 17.32% |
+| Frontera | 16.75% |
+| Hermosillo | 13.39% |
+
+Esto me sorprendio porque muestra que una region puede tener pocos accidentes, pero una proporcion alta de casos graves. Por eso, el analisis preventivo no debe basarse solo en el total de accidentes.
+
+## 4. Analisis de calidad de los datos
+
+### Valores faltantes
+
+Despues de la limpieza inicial, los valores faltantes principales fueron:
+
+| Variable | Valores faltantes |
+|---|---:|
+| `EDAD_CONDUCTOR` | 31,101 |
+| `HORA_VALIDA` | 1 |
+
+La variable `EDAD_CONDUCTOR` tiene faltantes porque algunos registros tienen edad no especificada o valores que no representan una edad valida. La decision fue conservar la variable, pero tratar los faltantes mediante imputacion en los modelos. Para variables numericas se considero la mediana, y para categoricas la categoria mas frecuente.
+
+En el caso de `HORA_VALIDA`, solo se encontro un valor faltante, por lo que no afecta de manera importante el analisis. Para el analisis temporal se usan solo horas validas entre 0 y 23.
+
+### Duplicados
+
+Se detectaron **274 registros duplicados exactos**. La decision fue identificarlos y documentarlos. Para el analisis exploratorio general no cambian de manera importante las conclusiones debido al tamano del dataset, pero para una version final de modelado se recomienda eliminarlos con `drop_duplicates()` para evitar sobre-representar accidentes repetidos.
+
+### Outliers
+
+Los outliers se revisaron con el criterio del rango intercuartil. En variables como heridos, muertos y victimas, el IQR fue cero porque la mayoria de los accidentes no tienen victimas. Por eso, cualquier accidente con heridos o fallecidos aparece como valor extremo bajo este criterio.
+
+| Variable | Maximo observado | Outliers detectados por IQR | Decision |
+|---|---:|---:|---|
+| `TOTAL_HERIDOS` | 27 | 29,813 | Conservar, porque representan accidentes con lesionados |
+| `TOTAL_MUERTOS` | 6 | 1,975 | Conservar, porque representan accidentes fatales |
+| `TOTAL_VICTIMAS` | 32 | 31,252 | Conservar, porque explican la gravedad |
+| `TOTAL_VEHICULOS` | 9 | 40,775 | Conservar, porque multiples vehiculos pueden estar involucrados |
+| `EDAD_CONDUCTOR` | 98 | 1,140 | Conservar si esta entre 12 y 98 anos |
+
+La decision general fue **no eliminar outliers automaticamente**, porque en este problema los valores extremos son precisamente los casos de mayor interes preventivo. Eliminar accidentes con victimas podria ocultar los eventos mas importantes para la seguridad vial.
+
+## 5. Preprocesamiento documentado
+
+Durante el preprocesamiento se realizaron los siguientes pasos:
+
+1. **Filtrado geografico:** se seleccionaron solo los registros de Sonora con `ID_ENTIDAD = 26`.
+2. **Filtrado de registros no utiles:** se eliminaron los registros `Certificado cero`, porque no representan accidentes ocurridos.
+3. **Union con catalogo municipal:** se agrego `NOM_MUNICIPIO` usando el catalogo `tc_municipio.csv`.
+4. **Conversion de tipos:** se convirtieron columnas numericas como heridos, fallecidos, edad, hora y vehiculos involucrados.
+5. **Ingenieria de caracteristicas:** se crearon `TOTAL_HERIDOS`, `TOTAL_MUERTOS`, `TOTAL_VICTIMAS`, `TOTAL_VEHICULOS`, `GRAVE_BIN`, `NIVEL_GRAVEDAD`, `INVOLUCRA_MOTO` e `INVOLUCRA_BICI`.
+6. **Segmentacion regional:** se asigno cada municipio a una region de Sonora para comparar diferencias territoriales.
+7. **Variables temporales:** se creo `FECHA_MES` para el analisis mensual y `RANGO_HORA` para agrupar los accidentes en madrugada, manana, tarde y noche.
+8. **Tratamiento de faltantes:** en los modelos se usa imputacion mediante `SimpleImputer`; para numericas se usa mediana y para categoricas la moda.
+9. **Codificacion de variables categoricas:** se usa `OneHotEncoder` para convertir variables como region, municipio, tipo de accidente y causa probable en variables numericas.
+10. **Normalizacion:** se usa `StandardScaler` en variables numericas para que puedan combinarse adecuadamente con los modelos y el clustering.
+
+## 6. Principales hallazgos del EDA
+
+Los hallazgos mas importantes de esta etapa fueron:
+
+- El dataset final tiene **183,911 accidentes reales** de Sonora entre 2015 y 2024.
+- El mayor volumen de accidentes se concentra en **Hermosillo**, **Sur y Valle** y **Frontera**.
+- El ano con mas accidentes fue **2023**, con **26,557 registros**.
+- El tipo mas comun fue **colision con vehiculo automotor**.
+- La causa probable dominante fue **Conductor**.
+- El **16.99%** de los accidentes se clasifico como grave.
+- Las regiones con mayor porcentaje de gravedad fueron **Sierra**, **Centro** y **Sur y Valle**.
+- Los outliers no deben eliminarse automaticamente, porque representan accidentes con victimas o con multiples vehiculos involucrados.
+
+## 7. Reflexion de cierre
+
+En esta etapa aprendi que el analisis exploratorio no solo sirve para hacer graficas, sino para entender realmente el comportamiento del problema. Al inicio esperaba que las zonas con mas accidentes tambien fueran automaticamente las mas graves, pero los datos muestran que no siempre es asi. Hermosillo concentra muchos accidentes, pero regiones con menos registros, como Sierra o Centro, tienen porcentajes de gravedad mas altos.
+
+Tambien me sorprendio que la causa `Conductor` aparezca con tanta frecuencia. Esto hace que la prevencion tenga que enfocarse mucho en educacion vial, vigilancia, control de velocidad y reduccion de conductas de riesgo.
+
+Una limitacion importante es que ATUS registra accidentes en zonas urbanas y suburbanas, por lo que no necesariamente representa todos los accidentes carreteros del estado. Otra limitacion es que algunas variables tienen valores no especificados, como la edad del conductor, y eso puede afectar ciertos analisis.
+
+En general, esta etapa fue necesaria para preparar los datos antes de modelar. Gracias al EDA pude identificar que variables son utiles, que problemas de calidad existen, que regiones requieren mas atencion y que tipo de patrones pueden servir para proponer estrategias de prevencion vial.
