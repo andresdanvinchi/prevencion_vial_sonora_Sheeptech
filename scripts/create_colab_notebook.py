@@ -110,39 +110,54 @@ sns.set_theme(style="whitegrid", palette="Set2")
         r"""
 ## 3. Ubicar datos del proyecto
 
-Para usarlo en Colab, sube la carpeta del proyecto completa o monta Google Drive. El notebook buscara automaticamente `datos/originales/conjunto_de_datos`.
+Por defecto, el notebook lee los CSV directamente desde GitHub usando `raw.githubusercontent.com`.
+
+Si quieres ejecutarlo con archivos locales, cambia `USE_GITHUB_DATA` a `False` y conserva la estructura `datos/originales/...` dentro del proyecto.
 """
     ),
     code(
         r"""
-# Si usas Google Drive, descomenta estas lineas:
-# from google.colab import drive
-# drive.mount("/content/drive")
+USE_GITHUB_DATA = True
+GITHUB_BRANCH = "feature/notebook-atus-sonora-10-anios"
+GITHUB_RAW_BASE = (
+    "https://raw.githubusercontent.com/"
+    f"andresdanvinchi/prevencion_vial_sonora_Sheeptech/{GITHUB_BRANCH}"
+)
 
-candidate_base_dirs = [
-    Path.cwd(),
-    Path.cwd().parent,
-    Path("/content/prevencion_vial_sonora_Sheeptech"),
-    Path("/content/drive/MyDrive/prevencion_vial_sonora_Sheeptech"),
-]
+if USE_GITHUB_DATA:
+    DATA_DIR = f"{GITHUB_RAW_BASE}/datos/originales/conjunto_de_datos"
+    CAT_DIR = f"{GITHUB_RAW_BASE}/datos/originales/catalogos"
+    print("Fuente de datos: GitHub raw")
+    print("Datos:", DATA_DIR)
+else:
+    # Si usas Google Drive, descomenta estas lineas:
+    # from google.colab import drive
+    # drive.mount("/content/drive")
 
-PROJECT_DIR = None
-for base in candidate_base_dirs:
-    if (base / "datos" / "originales" / "conjunto_de_datos").exists():
-        PROJECT_DIR = base
-        break
+    candidate_base_dirs = [
+        Path.cwd(),
+        Path.cwd().parent,
+        Path("/content/prevencion_vial_sonora_Sheeptech"),
+        Path("/content/drive/MyDrive/prevencion_vial_sonora_Sheeptech"),
+    ]
 
-if PROJECT_DIR is None:
-    raise FileNotFoundError(
-        "No se encontro la carpeta datos/originales/conjunto_de_datos. "
-        "Sube el proyecto completo a Colab o ajusta PROJECT_DIR manualmente."
-    )
+    PROJECT_DIR = None
+    for base in candidate_base_dirs:
+        if (base / "datos" / "originales" / "conjunto_de_datos").exists():
+            PROJECT_DIR = base
+            break
 
-DATA_DIR = PROJECT_DIR / "datos" / "originales" / "conjunto_de_datos"
-CAT_DIR = PROJECT_DIR / "datos" / "originales" / "catalogos"
+    if PROJECT_DIR is None:
+        raise FileNotFoundError(
+            "No se encontro la carpeta datos/originales/conjunto_de_datos. "
+            "Sube el proyecto completo a Colab o ajusta PROJECT_DIR manualmente."
+        )
 
-print("Proyecto:", PROJECT_DIR)
-print("Datos:", DATA_DIR)
+    DATA_DIR = PROJECT_DIR / "datos" / "originales" / "conjunto_de_datos"
+    CAT_DIR = PROJECT_DIR / "datos" / "originales" / "catalogos"
+    print("Fuente de datos: local")
+    print("Proyecto:", PROJECT_DIR)
+    print("Datos:", DATA_DIR)
 """
     ),
     md("## 4. Cargar ATUS 2015-2024 y filtrar Sonora"),
@@ -151,12 +166,14 @@ print("Datos:", DATA_DIR)
 YEARS = list(range(2015, 2025))
 SONORA_ID = "26"
 
-def read_atus_year(year):
-    path = DATA_DIR / f"atus_anual_{year}.csv"
-    if not path.exists():
-        raise FileNotFoundError(f"No existe {path}")
+def data_path(base_dir, filename):
+    if isinstance(base_dir, str):
+        return f"{base_dir}/{filename}"
+    return base_dir / filename
+
+def read_csv_clean(path_or_url):
     df = pd.read_csv(
-        path,
+        path_or_url,
         dtype=str,
         skipinitialspace=True,
         encoding="utf-8",
@@ -169,6 +186,12 @@ def read_atus_year(year):
         df[col] = df[col].replace({"nan": np.nan, "None": np.nan})
     return df
 
+def read_atus_year(year):
+    path = data_path(DATA_DIR, f"atus_anual_{year}.csv")
+    if isinstance(path, Path) and not path.exists():
+        raise FileNotFoundError(f"No existe {path}")
+    return read_csv_clean(path)
+
 frames = []
 for year in YEARS:
     tmp = read_atus_year(year)
@@ -177,10 +200,7 @@ for year in YEARS:
 
 atus = pd.concat(frames, ignore_index=True)
 
-mun = pd.read_csv(CAT_DIR / "tc_municipio.csv", dtype=str, encoding="utf-8", skipinitialspace=True)
-mun.columns = mun.columns.str.strip()
-for col in mun.columns:
-    mun[col] = mun[col].astype(str).str.strip()
+mun = read_csv_clean(data_path(CAT_DIR, "tc_municipio.csv"))
 mun["ID_ENTIDAD"] = mun["ID_ENTIDAD"].str.zfill(2)
 mun["ID_MUNICIPIO"] = mun["ID_MUNICIPIO"].str.zfill(3)
 
