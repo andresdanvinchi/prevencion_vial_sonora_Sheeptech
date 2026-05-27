@@ -101,13 +101,16 @@ Para el preprocesamiento se uso imputacion de faltantes, codificacion One-Hot pa
 
 | Modelo | Tipo | Funcion dentro del proyecto |
 |---|---|---|
-| árbol de Decision base | Clasificación supervisada | Sirve como linea base simple con parametros por defecto |
+| KNN linea base | Clasificación supervisada basada en vecinos | Cumple el metodo de K-Nearest Neighbors del curso y sirve como referencia simple |
+| árbol de Decision interpretable | Clasificación supervisada | Sirve para extraer una regla IF-THEN y explicar una decision del modelo |
 | Regresion Logística | Clasificación supervisada interpretable | Permite comparar con un modelo claro y facil de explicar |
 | Random Forest ajustado | Clasificación supervisada elaborada | Busca mejor rendimiento con ajuste de hiperparametros |
 | Clustering jerárquico | Aprendizaje no supervisado | Agrupa municipios con patrones parecidos |
 | Reglas de asociación | Metodo descriptivo | Encuentra combinaciones frecuentes relacionadas con gravedad |
 
-El árbol de Decision se uso como punto de partida. Es facil de entender, pero puede ser inestable y ajustarse demasiado a los datos si no se controla su profundidad. Aun asi, cumple bien la funcion de linea base.
+KNN se agrego como linea base del curso. Este metodo clasifica un accidente segun los casos mas cercanos despues del preprocesamiento. Debido al tamaño del dataset y a la cantidad de variables categoricas codificadas, se uso como referencia tecnica y no como candidato principal de recomendacion.
+
+El árbol de Decision se uso como modelo interpretable. A diferencia del Random Forest, permite leer rutas de decision concretas. Por eso se extrajo una regla IF-THEN para explicar de forma sencilla que combinaciones de condiciones llevan al modelo hacia una clasificacion de gravedad.
 
 La Regresion Logística se incluyo porque es interpretable. Aunque no siempre logra el mejor rendimiento, permite entender de forma más clara como cambian las probabilidades segun las variables. También se uso con pesos balanceados para dar mayor atencion a la clase grave.
 
@@ -123,15 +126,25 @@ La evaluación de clasificación no se baso solamente en accuracy. En este probl
 
 Por eso se revisaron precision, recall, F1-score, matriz de confusion, curva ROC y ROC-AUC. La precision indica que tan confiables son las predicciones positivas de gravedad. El recall indica cuantos accidentes graves reales logra detectar el modelo. El F1-score resume el equilibrio entre precision y recall.
 
-En la ejecucion documentada en E3, el Random Forest ajustado obtuvo el mejor F1 para la clase grave. La Regresion Logística tuvo el mayor recall, por lo que puede ser util si la prioridad principal es detectar la mayor cantidad posible de accidentes graves, aunque produzca más falsos positivos.
+En la ejecucion documentada, el Random Forest ajustado obtuvo el mejor equilibrio para la clase grave. La Regresion Logística tuvo alto recall, por lo que puede ser util si la prioridad principal es detectar la mayor cantidad posible de accidentes graves, aunque produzca más falsos positivos. KNN y el árbol interpretable se conservaron como referencias del curso y como apoyo explicativo.
 
 | Modelo | Accuracy | Precision grave | Recall grave | F1 grave | ROC-AUC |
 |---|---:|---:|---:|---:|---:|
-| árbol de Decision base | 0.8466 | 0.5491 | 0.5437 | 0.5464 | 0.7260 |
+| KNN linea base | Ver notebook | Ver notebook | Ver notebook | Ver notebook | Ver notebook |
+| árbol IF-THEN | Ver notebook | Ver notebook | Ver notebook | Ver notebook | Ver notebook |
 | Regresion Logística | 0.8229 | 0.4861 | 0.7387 | 0.5863 | 0.8806 |
 | Random Forest ajustado | 0.8600 | 0.5719 | 0.7007 | 0.6298 | 0.8911 |
 
-Estos resultados corresponden al notebook E3 alineado con el cuaderno principal ATUS. La interpretación se mantiene: no basta con ver accuracy, porque la clase grave es menos frecuente y es la más importante para prevencion.
+Los valores exactos de KNN y del árbol IF-THEN quedan en el notebook principal ATUS porque se calculan al ejecutar las celdas con las muestras estratificadas definidas para mantener el proceso reproducible. La interpretación se mantiene: no basta con ver accuracy, porque la clase grave es menos frecuente y es la más importante para prevencion.
+
+Como parte del requisito de árboles de Decision, el notebook extrae una regla IF-THEN mediante `export_text`. La lectura esperada de esa salida es:
+
+```text
+IF se cumplen las condiciones de la ruta del arbol
+THEN el accidente se clasifica hacia No grave o Grave segun la hoja final.
+```
+
+Esta regla ayuda a comunicar el razonamiento de un modelo simple, aunque el modelo recomendado para desempeño general siga siendo Random Forest.
 
 ## 8. Comparativa y recomendación
 
@@ -139,7 +152,7 @@ Con base en las metricas, el modelo recomendado para el proyecto es el Random Fo
 
 La Regresion Logística no se descarta. Su recall fue alto, lo que significa que detecta una mayor proporcion de accidentes graves. En un contexto preventivo donde se prefiere activar alertas aunque existan falsos positivos, podría ser una opcion util. Ademas, es más facil de explicar que Random Forest.
 
-El árbol de Decision base cumple como referencia inicial, pero no sería la primera recomendación final. Su desempeno fue menor y puede depender mucho de pequeñas variaciones en los datos.
+KNN y el árbol IF-THEN cumplen funciones de referencia. KNN permite cubrir un metodo basado en cercania entre observaciones, mientras que el árbol permite explicar decisiones con reglas. Ninguno de los dos desplaza la recomendacion principal porque el objetivo final requiere balance entre deteccion de gravedad y estabilidad del modelo.
 
 El clustering jerárquico no compite directamente con los clasificadores porque responde otra pregunta. Mientras los clasificadores predicen gravedad a nivel de accidente, el clustering agrupa municipios. Esto permite pensar en estrategias diferenciadas: municipios con alto volumen, municipios con alta gravedad proporcional y municipios con participacion relevante de motocicletas o tipos especificos de accidente.
 
@@ -175,7 +188,7 @@ Una conclusión central es que el volumen de accidentes y la gravedad no siempre
 
 Otra conclusión es que la causa probable `Conductor` domina los registros. Esto no significa culpar a personas individuales, sino reconocer que la conducta vial debe ser un eje fuerte de prevencion. La educacion vial, el control de velocidad, la atencion a motociclistas y la vigilancia en horarios criticos pueden tener impacto.
 
-En modelado, el Random Forest ajustado fue la recomendación principal por su equilibrio entre precision y recall para accidentes graves. La Regresion Logística queda como alternativa interpretable, especialmente si se busca explicar de manera sencilla los resultados o priorizar recall.
+En modelado, el Random Forest ajustado fue la recomendación principal por su equilibrio entre precision y recall para accidentes graves. La Regresion Logística queda como alternativa interpretable, especialmente si se busca explicar de manera sencilla los resultados o priorizar recall. KNN y el árbol IF-THEN se incorporaron como referencias del curso y para fortalecer la explicabilidad.
 
 El clustering jerárquico agrego valor al mostrar que los municipios pueden agruparse por perfiles de riesgo. Esto abre la puerta a estrategias diferenciadas por tipo de municipio, en lugar de aplicar una sola recomendación general para todo el estado.
 
@@ -252,6 +265,37 @@ preprocess = ColumnTransformer(
 ```
 
 ### Anexo D. Random Forest ajustado
+
+### Anexo D1. KNN linea base
+
+```python
+knn_model = Pipeline([
+    ("preprocess", preprocess),
+    ("model", KNeighborsClassifier(n_neighbors=5, weights="distance")),
+])
+
+knn_model.fit(X_knn_train, y_knn_train)
+knn_pred = knn_model.predict(X_knn_test)
+```
+
+### Anexo D2. Regla IF-THEN del árbol de Decision
+
+```python
+tree_rule_model = Pipeline([
+    ("preprocess", preprocess),
+    ("model", DecisionTreeClassifier(max_depth=3, min_samples_leaf=100, random_state=42)),
+])
+
+tree_rule_model.fit(X_train, y_train)
+tree_rules = export_text(
+    tree_rule_model.named_steps["model"],
+    feature_names=list(tree_rule_model.named_steps["preprocess"].get_feature_names_out()),
+    max_depth=3,
+)
+
+print("Regla IF-THEN extraida del arbol:")
+print(tree_rules)
+```
 
 ```python
 rf_pipeline = Pipeline([

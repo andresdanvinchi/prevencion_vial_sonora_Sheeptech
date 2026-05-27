@@ -86,17 +86,24 @@
 
 ## Diapositiva 13: Modelos de clasificación de gravedad
 1. **Título:** Se entrenaron modelos para clasificar accidentes graves
-2. **Texto breve:** Variable objetivo: GRAVE_BIN. Modelos: Árbol de Decisión, Regresión Logística y Random Forest ajustado. Se evitó fuga de información excluyendo heridos, muertos, víctimas y CLASACC como predictores.
-3. **Visual:** `presentacion_assets/generated/modelos_pipeline_gravedad.png`. Para evidencia de evaluación específica se pueden revisar `presentacion_assets/notebook_outputs/e3_cell_14_img_1.png`, `e3_cell_16_img_1.png` y `e3_cell_18_img_1.png` en E3 celdas 14, 16 y 18.
+2. **Texto breve:** Variable objetivo: GRAVE_BIN. Modelos: KNN linea base, Árbol de Decisión interpretable, Regresión Logística y Random Forest ajustado. Se evitó fuga de información excluyendo heridos, muertos, víctimas y CLASACC como predictores.
+3. **Visual:** `presentacion_assets/generated/modelos_pipeline_gravedad.png`. Para evidencia de evaluación específica se puede revisar el notebook principal `notebooks/atus_sonora_10_anios_prevencion.ipynb`, sección 9.
 4. **Notas:** Explicar por qué no se usaron variables que ya contienen la respuesta. Frase: "El modelo debía aprender patrones previos, no recibir la gravedad ya calculada."
-5. **Recomendación visual:** Tres mini paneles por modelo o un diagrama de pipeline: preprocesamiento -> entrenamiento -> evaluación. Transición: "La comparación se hizo con métricas enfocadas en la clase grave."
+5. **Recomendación visual:** Cuatro mini paneles por modelo o un diagrama de pipeline: preprocesamiento -> entrenamiento -> evaluación. Transición: "La comparación se hizo con métricas enfocadas en la clase grave."
 
 ## Diapositiva 14: Comparación de modelos
 1. **Título:** Random Forest logró el mejor equilibrio para gravedad
-2. **Texto breve:** Random Forest ajustado obtuvo F1 grave de 0.6298 y ROC-AUC de 0.8911. Regresión Logística tuvo mayor recall grave: 0.7387.
-3. **Visual:** `presentacion_assets/generated/modelos_comparacion.png`. Revisar E3 celda 26.
+2. **Texto breve:** KNN y Árbol de Decisión se usaron como líneas base del curso. Random Forest se mantiene como recomendación por balance general, mientras Regresión Logística funciona como alternativa interpretable con alto recall.
+3. **Visual:** `presentacion_assets/generated/modelos_comparacion.png`. Revisar notebook principal, sección 9.
 4. **Notas:** Explicar que accuracy no basta porque los accidentes graves son minoría. Frase: "En prevención vial importa detectar los casos graves, no solo acertar en la mayoría."
 5. **Recomendación visual:** Tabla comparativa con Random Forest resaltado y una nota para Regresión Logística como opción sensible al recall. Transición: "Para entender el modelo fuerte revisamos sus variables más importantes."
+
+## Diapositiva 14B: Regla IF-THEN del Árbol de Decisión
+1. **Título:** El árbol permite explicar una decisión en forma IF-THEN
+2. **Texto breve:** Se entrenó un Árbol de Decisión interpretable y se extrajo una regla IF-THEN para mostrar cómo ciertas condiciones de tipo de accidente, región u horario pueden dirigir un caso hacia gravedad.
+3. **Visual:** Captura o bloque breve de la regla generada en el notebook principal. Mantener solo una ruta legible, no todo el árbol.
+4. **Notas:** Aclarar que la regla no reemplaza al Random Forest: sirve para explicar el razonamiento de un modelo sencillo. Frase: "El árbol sacrifica rendimiento, pero gana transparencia."
+5. **Recomendación visual:** Formato de decisión: IF condiciones -> THEN clase probable. Transición: "Para entender el modelo fuerte revisamos sus variables más importantes."
 
 ## Diapositiva 15: Importancia de variables con Random Forest
 1. **Título:** El tipo de accidente fue una señal clave para el modelo
