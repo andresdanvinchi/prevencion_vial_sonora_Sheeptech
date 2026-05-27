@@ -34,8 +34,8 @@ En este repositorio se usan los CSV anuales de 2015 a 2024 y el catalogo municip
    - Implementa y evalua los modelos del entregable E3.
    - Incluye Arbol de Decision base, Regresion Logistica, Random Forest ajustado, clustering jerarquico y reglas de asociacion.
 
-3. `E2_Analisis_Exploratorio_Preprocesamiento/notebook_e2.md`
-   - Documento de apoyo con el resumen del analisis exploratorio y preprocesamiento.
+3. `E2_Analisis_Exploratorio_Preprocesamiento/E2_Analisis_Exploratorio_Preprocesamiento.ipynb`
+   - Cuaderno ejecutable de apoyo con carga, limpieza, analisis exploratorio y preprocesamiento.
 
 4. `E4_Informe_Final_Codigo_Completo/Informe_Final_Prevencion_Vial_Sonora.docx`
    - Informe final escrito del proyecto.
