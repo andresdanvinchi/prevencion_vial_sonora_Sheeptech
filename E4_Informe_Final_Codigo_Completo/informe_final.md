@@ -28,7 +28,7 @@ La exploracion mostro que Hermosillo concentra el mayor numero de accidentes, se
 
 En modelado se implementaron varios enfoques. Primero, un Arbol de Decision como linea base. Despues, una Regresion Logistica como modelo interpretable y un Random Forest ajustado como modelo mas elaborado. Tambien se uso clustering jerarquico para agrupar municipios con comportamientos parecidos y reglas de asociacion para encontrar combinaciones frecuentes relacionadas con accidentes graves.
 
-La recomendacion principal fue usar el Random Forest ajustado como modelo de clasificacion cuando se busca el mejor equilibrio entre precision y recall para accidentes graves. La Regresion Logistica se conserva como alternativa cuando se necesita una explicacion mas sencilla. El clustering y las reglas de asociacion complementan el analisis porque ayudan a traducir los resultados en acciones preventivas por region o tipo de municipio.
+La recomendacion principal fue usar el Random Forest ajustado como modelo de clasificacion cuando se busca el mejor equilibrio entre precision y recall para accidentes graves. Este informe queda alineado con el cuaderno principal `notebooks/atus_sonora_10_anios_prevencion.ipynb` y con el entregable E3 actualizado. La Regresion Logistica se conserva como alternativa cuando se necesita una explicacion mas sencilla. El clustering y las reglas de asociacion complementan el analisis porque ayudan a traducir los resultados en acciones preventivas por region o tipo de municipio.
 
 ## 1. Introduccion y contexto del problema
 
@@ -123,15 +123,15 @@ La evaluacion de clasificacion no se baso solamente en accuracy. En este problem
 
 Por eso se revisaron precision, recall, F1-score, matriz de confusion, curva ROC y ROC-AUC. La precision indica que tan confiables son las predicciones positivas de gravedad. El recall indica cuantos accidentes graves reales logra detectar el modelo. El F1-score resume el equilibrio entre precision y recall.
 
-En una prueba de ejecucion con muestra reducida para validar el notebook, el Random Forest ajustado obtuvo el mejor F1 para la clase grave. La Regresion Logistica tuvo el mayor recall, por lo que puede ser util si la prioridad principal es detectar la mayor cantidad posible de accidentes graves, aunque produzca mas falsos positivos.
+En la ejecucion documentada en E3, el Random Forest ajustado obtuvo el mejor F1 para la clase grave. La Regresion Logistica tuvo el mayor recall, por lo que puede ser util si la prioridad principal es detectar la mayor cantidad posible de accidentes graves, aunque produzca mas falsos positivos.
 
 | Modelo | Accuracy | Precision grave | Recall grave | F1 grave | ROC-AUC |
 |---|---:|---:|---:|---:|---:|
-| Arbol de Decision base | 0.8280 | 0.4928 | 0.5354 | 0.5132 | 0.7150 |
-| Regresion Logistica | 0.8200 | 0.4792 | 0.7244 | 0.5768 | 0.8957 |
-| Random Forest ajustado | 0.8680 | 0.6045 | 0.6378 | 0.6207 | 0.8868 |
+| Arbol de Decision base | 0.8466 | 0.5491 | 0.5437 | 0.5464 | 0.7260 |
+| Regresion Logistica | 0.8229 | 0.4861 | 0.7387 | 0.5863 | 0.8806 |
+| Random Forest ajustado | 0.8600 | 0.5719 | 0.7007 | 0.6298 | 0.8911 |
 
-Estos resultados corresponden a una ejecucion de verificacion con muestra reducida. En el notebook completo, los valores pueden cambiar al ejecutar con mas registros, pero la interpretacion de las metricas se mantiene: no basta con ver accuracy, porque la clase grave es menos frecuente y es la mas importante para prevencion.
+Estos resultados corresponden al notebook E3 alineado con el cuaderno principal ATUS. La interpretacion se mantiene: no basta con ver accuracy, porque la clase grave es menos frecuente y es la mas importante para prevencion.
 
 ## 8. Comparativa y recomendacion
 
@@ -153,7 +153,7 @@ El tercer resultado es que la colision con vehiculo automotor domina el total de
 
 El cuarto resultado es la relevancia de motocicletas. La colision con motocicleta aparece entre los tipos mas frecuentes y la variable de motocicleta tiene peso en el modelado. Por eso, las recomendaciones deben incluir uso de casco, visibilidad, respeto de carriles y campanas dirigidas a motociclistas.
 
-El quinto resultado es temporal: los viernes por la tarde concentran muchos accidentes. Esta informacion permite proponer acciones por horario, como operativos preventivos, mensajes en redes o refuerzo de vigilancia en horas de salida laboral.
+El quinto resultado es temporal: las tardes cercanas al fin de semana concentran muchos accidentes, y viernes por la tarde registra 10,802 casos. Esta informacion permite proponer acciones por horario, como operativos preventivos, mensajes en redes o refuerzo de vigilancia en horas de salida laboral.
 
 ## 10. Discusion critica y limitaciones
 
@@ -187,7 +187,7 @@ En general, el proyecto demuestra que la mineria de datos puede apoyar la preven
 2. Atender la gravedad proporcional en Sierra, Centro y Sur y Valle.
 3. Reforzar campanas sobre velocidad, distancia segura y respeto a senalamientos.
 4. Desarrollar campanas especificas para motociclistas.
-5. Revisar horarios criticos, especialmente tardes de viernes.
+5. Revisar horarios criticos, especialmente tardes cercanas al fin de semana y viernes por la tarde.
 6. Complementar ATUS con datos de infraestructura, clima, alcoholimetria y carreteras si se desea un analisis mas completo.
 7. Mantener el repositorio organizado para que los notebooks puedan ejecutarse de nuevo con datos actualizados.
 
