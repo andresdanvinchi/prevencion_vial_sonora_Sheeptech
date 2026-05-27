@@ -20,7 +20,7 @@ Periodo analizado: 2015-2024.
 
 ## Resumen ejecutivo
 
-Este proyecto estudia los accidentes de transito registrados en Sonora durante los ultimos diez anos disponibles en la base ATUS. El proposito principal fue identificar patrones regionales de frecuencia, gravedad y causas probables para proponer acciones preventivas mas enfocadas. El enfoque no fue buscar culpables individuales, sino entender el comportamiento general de los datos y traducirlo en informacion util para la seguridad vial.
+Este proyecto estudia los accidentes de transito registrados en Sonora durante los ultimos diez años disponibles en la base ATUS. El proposito principal fue identificar patrones regionales de frecuencia, gravedad y causas probables para proponer acciones preventivas mas enfocadas. El enfoque no fue buscar culpables individuales, sino entender el comportamiento general de los datos y traducirlo en informacion util para la seguridad vial.
 
 El analisis partio de registros anuales de accidentes en zonas urbanas y suburbanas. Despues de filtrar Sonora y eliminar registros marcados como `Certificado cero`, se trabajo con 183,911 accidentes reales. Se construyeron variables derivadas como region, total de heridos, total de fallecidos, total de victimas, participacion de motocicleta o bicicleta, rango de hora y una variable binaria de gravedad.
 
@@ -55,7 +55,7 @@ Los datos originales incluyen accidentes de todo Mexico. Para este proyecto se f
 | Municipios presentes | 70 |
 | Porcentaje de accidentes graves | 16.99% |
 
-Las variables disponibles incluyen informacion geografica, temporal, categorica y numerica. Entre las variables mas importantes estan municipio, ano, mes, dia de semana, hora, tipo de accidente, causa probable, tipo de vehiculos involucrados, personas heridas y personas fallecidas.
+Las variables disponibles incluyen informacion geografica, temporal, categorica y numerica. Entre las variables mas importantes estan municipio, año, mes, dia de semana, hora, tipo de accidente, causa probable, tipo de vehiculos involucrados, personas heridas y personas fallecidas.
 
 Para facilitar el analisis se crearon variables derivadas. La variable `REGION` permite comparar zonas de Sonora. `TOTAL_HERIDOS`, `TOTAL_MUERTOS` y `TOTAL_VICTIMAS` resumen el impacto humano del accidente. `GRAVE_BIN` clasifica si el accidente tuvo victimas. `RANGO_HORA` agrupa la hora del accidente en madrugada, manana, tarde y noche. `INVOLUCRA_MOTO` e `INVOLUCRA_BICI` indican si participaron motocicletas o bicicletas.
 
@@ -73,7 +73,7 @@ Los outliers se conservaron. En este problema, los valores extremos no son ruido
 
 ## 4. Analisis exploratorio
 
-El analisis exploratorio permitio conocer el comportamiento general antes de aplicar modelos. El primer hallazgo fue temporal: los accidentes aumentaron de manera gradual hasta 2019, bajaron en 2020 y subieron con fuerza despues de ese ano. El valor mas alto se observo en 2023, con 26,557 accidentes.
+El analisis exploratorio permitio conocer el comportamiento general antes de aplicar modelos. El primer hallazgo fue temporal: los accidentes aumentaron de manera gradual hasta 2019, bajaron en 2020 y subieron con fuerza despues de ese año. El valor mas alto se observo en 2023, con 26,557 accidentes.
 
 Por region, Hermosillo concentro 65,252 accidentes, seguido por Sur y Valle con 54,154 y Frontera con 44,264. Este resultado era esperado porque son zonas con mayor movilidad urbana, actividad economica o flujo vehicular. Sin embargo, la gravedad conto una historia diferente.
 
