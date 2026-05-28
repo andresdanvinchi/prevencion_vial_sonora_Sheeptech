@@ -330,3 +330,106 @@ municipal = (
 X_cluster = StandardScaler().fit_transform(municipal[cluster_features])
 Z = linkage(X_cluster, method="ward")
 ```
+
+## 15. Anexo ampliatorio A. Alineación con la propuesta E1
+
+La propuesta original planteó estudiar los accidentes de tránsito en Sonora con énfasis en causas, gravedad y diferencias regionales. La ampliación del informe retoma ese planteamiento y lo conecta con los resultados reales del cuaderno ATUS, de modo que el documento final no solo describa el modelo, sino que cierre explícitamente la pregunta de investigación: qué patrones se observan y cómo pueden apoyar la prevención vial.
+
+| Elemento de la propuesta | Cómo se resolvió en el informe final |
+|---|---|
+| Problema | Ocurrencia de accidentes de tránsito en Sonora, con diferencias entre zonas urbanas, fronterizas, costeras, serranas y del sur. |
+| Pregunta principal | Comparar patrones regionales, causas frecuentes y gravedad para proponer medidas preventivas. |
+| Fuente de datos | ATUS de INEGI, periodo 2015-2024, filtrado a la entidad 26 Sonora. |
+| Métodos previstos | EDA, análisis regional y temporal, clasificación de gravedad, clustering y reglas de asociación. |
+| Enfoque preventivo | Traducir los hallazgos en acciones por región, tipo de accidente, horario y perfil de riesgo. |
+
+Esta comparación confirma que el desarrollo conservó la intención inicial: usar minería de datos como apoyo interpretativo y no como una predicción absoluta. También aclara por qué la gravedad se definió con base en heridos o fallecidos, tal como se propuso desde el inicio.
+
+## 16. Anexo ampliatorio B. Verificación de datos y depuración
+
+Para verificar los datos, se recalcularon los principales indicadores directamente desde los CSV locales de ATUS 2015-2024 y el catálogo municipal. Los resultados coinciden con los valores reportados en el cuaderno principal, por lo que las cifras del informe se consideran consistentes con la fuente de trabajo del proyecto.
+
+| Indicador validado | Resultado recalculado |
+|---|---:|
+| Registros de Sonora antes de depurar | 187,104 |
+| Registros `Certificado cero` eliminados | 3,193 |
+| Accidentes reales analizados | 183,911 |
+| Accidentes solo daños | 152,659 |
+| Accidentes con heridos | 29,277 |
+| Accidentes fatales | 1,975 |
+| Porcentaje de accidentes graves | 16.99% |
+| Personas heridas registradas | 39,686 |
+| Personas fallecidas registradas | 2,221 |
+
+La eliminación de `Certificado cero` es metodológicamente necesaria porque esos renglones indican ausencia de accidente. Mantenerlos habría reducido artificialmente la proporción de gravedad y habría introducido ruido en las comparaciones regionales y temporales.
+
+## 17. Anexo ampliatorio C. Lectura territorial de los resultados
+
+El análisis regional muestra que el volumen de accidentes y la gravedad relativa no apuntan siempre al mismo lugar. Hermosillo concentra la mayor cantidad de registros, pero Sierra, Centro y Sur y Valle presentan porcentajes de gravedad superiores. Esta distinción es central para proponer medidas preventivas más justas: no basta con ordenar municipios por número de accidentes.
+
+| Región | Accidentes | Graves | % graves | Heridos | Fallecidos |
+|---|---:|---:|---:|---:|---:|
+| Hermosillo | 65,252 | 8,736 | 13.39% | 10,563 | 480 |
+| Sur y Valle | 54,154 | 11,436 | 21.12% | 14,403 | 783 |
+| Frontera | 44,264 | 7,415 | 16.75% | 9,671 | 499 |
+| Costa y desierto | 16,943 | 2,935 | 17.32% | 4,035 | 305 |
+| Centro | 1,872 | 419 | 22.38% | 605 | 99 |
+| Sierra | 763 | 185 | 24.25% | 249 | 44 |
+
+- Hermosillo requiere acciones de cobertura amplia por su volumen absoluto de accidentes.
+- Sur y Valle combina volumen alto con una proporción de gravedad elevada, por lo que debe ser prioridad preventiva.
+- Sierra y Centro requieren atención focalizada, aunque tengan menor número de registros, porque su porcentaje de accidentes graves es mayor.
+
+## 18. Anexo ampliatorio D. Patrones temporales, causas y tipos de accidente
+
+El cuaderno ATUS muestra una recuperación fuerte del volumen de accidentes después de 2020. El punto mensual más bajo fue abril de 2020, con 664 accidentes, mientras que el máximo mensual ocurrió en octubre de 2023, con 2,539 accidentes. El promedio mensual del periodo fue de 1,532.59 accidentes.
+
+| Año | Accidentes |
+|---|---:|
+| 2015 | 11,960 |
+| 2016 | 13,145 |
+| 2017 | 15,927 |
+| 2018 | 15,938 |
+| 2019 | 16,624 |
+| 2020 | 12,893 |
+| 2021 | 20,743 |
+| 2022 | 25,325 |
+| 2023 | 26,557 |
+| 2024 | 24,799 |
+
+Por causa probable, la categoría Conductor domina con 96.86% de los registros. Le siguen Peatón o pasajero con 1.23%, Falla del vehículo con 1.06% y Mala condición del camino con 0.74%. Por tipo de accidente, sobresalen la colisión con vehículo automotor, la colisión con motocicleta, la colisión con objeto fijo y la colisión con peatón.
+
+El rango de hora con más accidentes fue la tarde, con 69,114 casos, seguido por noche con 51,156, mañana con 45,260 y madrugada con 18,380. Esto sugiere campañas y vigilancia en horarios de alta movilidad, sin descuidar la gravedad de eventos nocturnos y de madrugada.
+
+## 19. Anexo ampliatorio E. Evidencia estadística y desempeño de modelos
+
+Las pruebas de Chi-cuadrada del cuaderno respaldan que las variables categóricas analizadas no se comportan como independientes. La asociación más fuerte observada fue entre región y tipo de accidente, con Cramér V de 0.143. Aunque el tamaño del efecto es moderado-bajo, es suficiente para justificar lecturas regionales diferenciadas.
+
+| Relación evaluada | Cramér V | Lectura |
+|---|---:|---|
+| Región - tipo de accidente | 0.143 | El tipo de accidente cambia según la zona del estado. |
+| Región - causa probable | 0.091 | Las causas mantienen diferencias regionales observables. |
+| Región - nivel de gravedad | 0.068 | La gravedad no se distribuye igual entre regiones. |
+| Rango de hora - gravedad | 0.052 | El horario aporta señal, aunque limitada. |
+| Día de semana - gravedad | 0.035 | La asociación existe, pero es débil. |
+
+| Modelo | Accuracy | Precisión grave | Recall grave | Uso recomendado |
+|---|---:|---:|---:|---|
+| Regresión logística | 0.8163 | 0.47 | 0.75 | Explicación simple y sensibilidad alta. |
+| Random Forest | 0.8633 | 0.58 | 0.69 | Mejor balance general para clasificación. |
+
+En reglas de asociación, la colisión con peatón hacia gravedad alta alcanzó confianza de 1.0 y lift de 5.88. Esto no significa causalidad automática, pero sí una alerta clara: los atropellamientos deben tratarse como eventos prioritarios dentro de la estrategia preventiva.
+
+## 20. Anexo ampliatorio F. Síntesis preventiva derivada de los hallazgos
+
+La información adicional permite convertir el análisis en una matriz de intervención. La prevención debe diferenciar entre zonas de alto volumen, zonas de alta severidad y tipos de accidente que tienden a producir víctimas. Este enfoque evita una recomendación única para todo el estado.
+
+| Prioridad | Evidencia | Acción preventiva sugerida |
+|---|---|---|
+| Alto volumen urbano | Hermosillo: 65,252 accidentes. | Operativos en intersecciones, control de velocidad y educación vial masiva. |
+| Alta severidad regional | Sierra 24.25%, Centro 22.38%, Sur y Valle 21.12% graves. | Revisión de tramos, señalización, atención a traslados intermunicipales y respuesta de emergencia. |
+| Atropellamientos | Regla Apriori con lift 5.88 hacia gravedad alta. | Cruces seguros, iluminación, zonas escolares, campañas para peatones y conductores. |
+| Motocicletas | 12.19% de accidentes involucran motocicleta. | Uso de casco, visibilidad, carriles compartidos y vigilancia de maniobras riesgosas. |
+| Temporalidad | Máximo mensual en octubre de 2023; tarde concentra 69,114 casos. | Campañas por temporada y refuerzo en horarios de mayor movilidad. |
+
+Con esta ampliación, el informe final queda sustentado por la propuesta E1, por el cuaderno ATUS y por una verificación independiente de los principales conteos. Las recomendaciones se mantienen como apoyo para la toma de decisiones, no como sustituto de diagnósticos viales de campo.
